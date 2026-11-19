@@ -1,0 +1,738 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Tonnetz neighbourhood: reference demo</title>
+<!-- REFERENCE DEMO, generated from the Harmonic Grid book (music/notes/assets/book_widgets.js + book_html.CSS).
+     This is the exact diagram of Chapter 7 "The key's neighbourhood". Do not hand-edit: it is the visual
+     and numerical baseline the new app is compared against. -->
+<style>
+:root { --ink:#1a202c; --muted:#52514e; --line:#cbd5e0; --soft:#f7fafc; --accent:#2c5282;
+        --purple:#6b46c1; --blue:#2a78d6; --orange:#eb6834; --surface:#fcfcfb; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: var(--ink); background: #fff; }
+main { padding: 20px 32px 80px; max-width: 1400px; margin: auto; }
+h1 { font: 700 26px/1.2 system-ui, sans-serif; margin: 0 0 4px; }
+h2 { font: 600 18px/1.3 system-ui, sans-serif; color: var(--accent); margin: 28px 0 4px; }
+p.lead { color: var(--muted); margin: 0 0 12px; }
+table { border-collapse: collapse; font: 13px/1.4 system-ui, sans-serif; }
+th, td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
+th { background: #edf2f7; position: relative; white-space: nowrap; }
+th.sortable { cursor: pointer; user-select: none; padding-right: 22px; }
+th.sortable::after { content: '↕'; position: absolute; right: 6px; color: #a0aec0; font-size: 12px; }
+th[data-sort=asc]::after { content: '▲'; color: var(--accent); }
+th[data-sort=desc]::after { content: '▼'; color: var(--accent); }
+#zoom { display: none; }
+/* widgets */
+[data-widget] { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 16px 0 22px;
+                background: var(--surface); font: 14px/1.45 system-ui, sans-serif; }
+.cd-row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.cd-row select { font: 15px system-ui, sans-serif; padding: 3px 6px; margin-left: 4px; }
+.cd-hint { color: var(--muted); font-size: 13px; }
+.cd-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cd-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; background: #fff; }
+.cd-k { color: var(--muted); font-size: 12.5px; }
+.cd-v { font: 700 26px/1.2 system-ui, sans-serif; }
+.cd-m { color: var(--ink); font-size: 13.5px; }
+.cd-plot { position: relative; }
+.cd-svg { width: 100%; height: auto; display: block; }
+.cd-svg .g { stroke: #e2e8f0; stroke-width: 1; }
+.cd-svg .q { stroke: #cbd5e0; stroke-width: 1.5; stroke-dasharray: 4 4; }
+.cd-svg .ax { fill: var(--muted); font-size: 12px; }
+.cd-svg .ql { fill: #8a8984; font-size: 13px; font-style: italic; }
+.cd-svg .pl { fill: var(--ink); font-size: 13px; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 3px; }
+.cd-svg .edge { fill: var(--blue); stroke: #fff; stroke-width: 2; }
+.cd-svg .corner { fill: var(--orange); stroke: #fff; stroke-width: 2; }
+.cd-svg .hit { fill: transparent; cursor: pointer; }
+.cd-svg .pt:hover polygon:not(.pat) { stroke: var(--ink); }
+.cd-tip { position: absolute; display: none; transform: translate(-50%, calc(-100% - 22px)); pointer-events: none;
+          background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: 13px;
+          box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; z-index: 5; }
+.cd-tip.on { display: block; }
+.cd-legend { color: var(--muted); font-size: 13px; margin: 4px 0 10px; }
+.cd-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 12px; }
+.pm-wrap { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+table.pm { border-collapse: separate; border-spacing: 2px; font-size: 12px; }
+table.pm th { background: none; border: none; padding: 0 6px; font-weight: 600; color: var(--muted); text-align: right; }
+table.pm td.pm-c { width: 34px; height: 16px; border: none; padding: 0; border-radius: 3px; }
+.pm-x { color: var(--muted); font-size: 13px; }
+.nm-pair { display: grid; grid-template-columns: 1fr; gap: 10px; justify-items: center; }
+.nm-rings { max-width: 980px; }
+.nm-h { font: 600 16px system-ui, sans-serif; color: var(--accent); justify-self: start; margin-top: 8px; }
+.nm-svg { width: 100%; height: auto; display: block; font-family: system-ui, sans-serif; }
+.nm-t { cursor: pointer; }
+.nm-t:hover polygon:not(.pat) { stroke: var(--ink); }
+.nm-trail { font-size: 14px; margin: 4px 0 10px; color: var(--ink); min-height: 1.4em; }
+.nm-btn { font: 13px system-ui, sans-serif; padding: 3px 10px; border: 1px solid var(--line); border-radius: 6px;
+          background: #fff; cursor: pointer; }
+.enc-legend { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; margin: 4px 0 8px; }
+.enc-cb { width: min(360px, 100%); }
+.enc-k { font-size: 12.5px; color: var(--ink); margin-bottom: 3px; }
+.enc-bar { position: relative; height: 16px; border-radius: 3px; }
+.enc-bar span { position: absolute; top: 0; height: 16px; font: 600 10.5px/16px system-ui, sans-serif; color: #fff;
+                text-align: center; text-shadow: 0 0 3px rgba(0,0,0,.55); border-left: 1.5px solid #fff; }
+.enc-bar span:first-child { border-left: none; }
+.enc-ticks { position: relative; height: 14px; font-size: 10.5px; color: var(--muted); }
+.enc-ticks span { position: absolute; transform: translateX(-50%); }
+.enc-pats { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; }
+.enc-pats .enc-k { flex-basis: 100%; }
+.enc-sw { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; }
+.enc-sw i { display: inline-block; width: 26px; height: 16px; border-radius: 3px; border: 1px solid #9aa3b0; margin: 0; }
+.enc-form { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 6px 0 10px; }
+.enc-form select { font: 14px system-ui, sans-serif; padding: 2px 4px; margin-left: 4px; }
+.enc-title { font: 600 15px system-ui, sans-serif; color: var(--accent); }
+#enc-btn { position: fixed; right: 16px; bottom: 16px; z-index: 45; font: 600 14px system-ui, sans-serif; padding: 8px 12px;
+           border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.15); cursor: pointer; }
+#enc-panel { display: none; position: fixed; right: 16px; bottom: 64px; z-index: 45; width: min(440px, calc(100vw - 32px));
+             background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+             box-shadow: 0 6px 24px rgba(0,0,0,.18); font: 14px system-ui, sans-serif; }
+#enc-panel.on { display: block; }
+#enc-panel .enc-form { flex-direction: column; align-items: flex-start; }
+</style></head><body><main>
+<h1>The key's neighbourhood (reference)</h1>
+<p class="lead">Exact copy of the live widgets in the Harmonic Grid book, Chapter 7. Open this file directly in a browser.</p>
+<div data-widget="display-settings"></div>
+<h2>Neighbourhood map</h2>
+<div data-widget="neighbour-map" data-from="0|"></div>
+<h2>VL × TD plot and table</h2>
+<div data-widget="chord-neighbours" data-from="0|"></div>
+<h2>Any two chords</h2>
+<div data-widget="chord-distance" data-from="0|" data-to="7|"></div>
+</main><script>// Interactive layer for the HTML book (harmonic-grid-book.html). Inlined by book_html.py.
+// CD = chord distance: the same VL / TD as assets/chord_distance.py (checked against it with
+// `python3 chord_distance.py --check-js`). UI: sortable tables, contents sidebar, image zoom,
+// and the widgets placed in the markdown as <div data-widget="...">.
+
+const CD = (() => {
+  const NAMES = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+  const L3 = Math.log2(3), L5 = Math.log2(5);
+  const SHAPES = { '': [[0, 0], [0, 1], [1, 0]], m: [[0, 0], [1, -1], [1, 0]], '°': [[0, 0], [1, -1], [2, -2]] };
+  // the key's own chords, by fret above the tonic (natural minor for a minor tonic)
+  const KEY_STEPS = { '': [[0, '', 'I'], [2, 'm', 'ii'], [4, 'm', 'iii'], [5, '', 'IV'], [7, '', 'V'], [9, 'm', 'vi'], [11, '°', 'vii°']],
+    m: [[0, 'm', 'i'], [2, '°', 'ii°'], [3, '', 'III'], [5, 'm', 'iv'], [7, 'm', 'v'], [8, '', 'VI'], [10, '', 'VII']] };
+  const keyOf = (root, kind) => new Map(KEY_STEPS[kind].map(([d, k, rn]) => [`${(root + d) % 12}|${k}`, rn]));
+  const POS = { 0: 0, 7: 1, 2: 2, 9: 3, 4: 4, 11: 5, 6: 6, 1: -5, 8: -4, 3: -3, 10: -2, 5: -1 };
+  const mod = (n, m) => ((n % m) + m) % m;
+  const fret = p => mod(7 * p[0] + 4 * p[1], 12);
+  const kees = (k, j) => (k * j >= 0 ? Math.abs(k) * L3 + Math.abs(j) * L5
+    : Math.max(Math.abs(k) * L3, Math.abs(j) * L5));
+  const oddLimit = (k, j) => {            // odd limit of 3^k 5^j
+    let n = 3 ** Math.max(k, 0) * 5 ** Math.max(j, 0);
+    let d = 3 ** Math.max(-k, 0) * 5 ** Math.max(-j, 0);
+    return Math.max(n, d);
+  };
+  const short = (a, b) => Math.min(mod(a - b, 12), mod(b - a, 12));
+  const perms = a => a.length <= 1 ? [a] :
+    a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map(r => [x, ...r]));
+  const chord = (root, kind) => SHAPES[kind].map(p => [POS[root] + p[0], p[1]]);
+  const name = (root, kind) => NAMES[root] + kind;
+
+  function vl(X, Y) {
+    const fx = X.map(fret);
+    let best = null;
+    for (const P of perms(Y.map(fret))) {
+      const t = fx.reduce((s, x, i) => s + short(x, P[i]), 0);
+      if (!best || t < best.total) best = { total: t, pairs: fx.map((x, i) => [x, P[i]]) };
+    }
+    best.moves = best.pairs.filter(([a, b]) => a !== b)
+      .map(([a, b]) => ({ from: NAMES[a], to: NAMES[b], cost: short(a, b) }));
+    return best;
+  }
+
+  function td(X, Y, win = 4) {
+    let best = null;
+    for (let da = -12; da <= 12; da++) for (let db = -win; db <= win; db++) {
+      if (mod(7 * da + 4 * db, 12)) continue;
+      const Yc = Y.map(p => [p[0] + da, p[1] + db]);
+      for (const P of perms(Yc)) {
+        let c = 0, held = 0;
+        X.forEach((p, i) => {
+          c += kees(P[i][0] - p[0], P[i][1] - p[1]);
+          held += (P[i][0] === p[0] && P[i][1] === p[1]);
+        });
+        if (!best || c < best.total - 1e-9 || (Math.abs(c - best.total) < 1e-9 && held > best.held))
+          best = { total: c, held, pairs: X.map((p, i) => [p, P[i]]) };
+      }
+    }
+    best.moves = best.pairs.filter(([p, q]) => p[0] !== q[0] || p[1] !== q[1]).map(([p, q]) => ({
+      from: NAMES[fret(p)], to: NAMES[fret(q)], fromF: fret(p), toF: fret(q),
+      limit: oddLimit(q[0] - p[0], q[1] - p[1]), cost: kees(q[0] - p[0], q[1] - p[1]) }));
+    return best;
+  }
+
+  // chord TD in 12-TET (chord_distance.td12): td's pairing, each move priced at its tempered size
+  function td12(X, Y) {
+    const t = td(X, Y), moves = t.moves.map(m => ({ ...m, cost12: PALETTE.etdFret[mod(m.toF - m.fromF, 12)] }));
+    return { total: moves.reduce((a, m) => a + m.cost12, 0), moves, pure: t.total };
+  }
+  const group = (v, t) => (v <= 2 ? 'smooth' : 'leap') + ', ' + (t < 5.5 ? 'near' : t < 7.5 ? 'far' : 'remote');
+
+  // every triad sharing a note with the given one, plus every chord of its key
+  function neighbours(root, kind) {
+    const X = chord(root, kind), fx = new Set(X.map(fret)), rows = [], key = keyOf(root, kind);
+    for (let r = 0; r < 12; r++) for (const k of ['', 'm', '°']) {
+      if (r === root && k === kind) continue;
+      const Y = chord(r, k), shared = Y.map(fret).filter(f => fx.has(f)).length;
+      const rn = key.get(`${r}|${k}`) || '';
+      if (!((shared && k !== '°') || rn)) continue;
+      const v = vl(X, Y), t = td(X, Y);
+      rows.push({ root: r, kind: k, chord: name(r, k), key: rn, shared, vl: v.total, td: t.total,
+        vlMoves: v.moves, tdMoves: t.moves, group: group(v.total, t.total) });
+    }
+    return rows;
+  }
+  // The key of a home triad and its neighbourhood (port of chord_distance.neighbourhood):
+  // order 0 = the key's chords, 1 = triads sharing an edge (two notes) with one of them,
+  // 2 = triads sharing a note with the key. Each gets one place on the grid.
+  const W3 = L3, CS = L3 / (2 * L5), SN = Math.sqrt(1 - CS * CS);
+  const xy = p => [p[0] * L3 + p[1] * L5 * CS, p[1] * L5 * SN];
+  const tri = (k, a, b) => k === 'up' ? [[a, b], [a, b + 1], [a + 1, b]] : [[a, b + 1], [a + 1, b], [a + 1, b + 1]];
+  const spell = (a, b) => { const n = a + 4 * b, acc = Math.floor((n + 1) / 7);
+    return 'FCGDAEB'[mod(n + 1, 7)] + (acc > 0 ? '♯'.repeat(acc) : '♭'.repeat(-acc)); };
+  const KEY_TRIS = [['up', 0, 0, 'I'], ['up', -1, 0, 'IV'], ['up', 1, 0, 'V'], ['dn', -1, 0, 'vi'], ['dn', 0, 0, 'iii'], ['dn', -2, 0, 'ii']];
+  const MINOR_RN = { I: 'III', ii: 'iv', iii: 'v', IV: 'VI', V: 'VII', vi: 'i', 'vii°': 'ii°' };
+  // scale degree of grid point p in the key of a home triad (natural minor for a minor home):
+  // the letter gives the number, the fret gives the accidental, e.g. F♯ in C = ♯4̂, B♭ in A minor = ♭2̂
+  const STEPS = { '': [0, 2, 4, 5, 7, 9, 11], m: [0, 2, 3, 5, 7, 8, 10] };
+  function degreeOf(nm, f, root, kind) {          // scale degree of the note named nm at absolute fret f
+    const t = chord(root, kind)[0], L = s => 'CDEFGAB'.indexOf(s[0]);
+    const d = mod(L(nm) - L(spell(...t)), 7);
+    const diff = mod(f - (root + STEPS[kind][d]) + 6, 12) - 6;
+    return (diff > 0 ? '♯'.repeat(diff) : '♭'.repeat(-diff)) + (d + 1) + '̂';
+  }
+  const degree = (p, root, kind) => degreeOf(spell(...p), fret(p), root, kind);
+  // every name a fret goes by: the grid's spelling first, then its enharmonic twin (G♯ / A♭, E♯ / F)
+  const SHARP = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+  const FLAT = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
+  function names(p) {
+    const nm = spell(...p), f = fret(p);
+    const alt = [SHARP[f], FLAT[f]].find(x => x !== nm);
+    return alt && alt !== nm ? [nm, alt] : [nm];
+  }
+  // tonal distance of a pitch class (fret above the root) in 12-TET: the expected TD of that fret
+  const pcTD = f => PALETTE.etdFret[mod(f, 12)];       // 12-TET (Appendix B)
+  function neighbourhood(root, kind) {
+    const X = chord(root, kind), M = kind === '' ? X[0] : [X[0][0] + 1, X[0][1] - 1];
+    const rnOf = rn => kind === '' ? rn : MINOR_RN[rn];
+    const keyTris = KEY_TRIS.map(([k, a, b, rn]) => [k, M[0] + a, M[1] + b, rnOf(rn)]);
+    const vii = [[M[0] + 1, M[1] + 1], [M[0] + 2, M[1]], [M[0] + 3, M[1] - 1]];
+    const id = p => p[0] + ',' + p[1];
+    const keyPts = new Set(keyTris.flatMap(([k, a, b]) => tri(k, a, b).map(id)));
+    const keySets = [...keyTris.map(([k, a, b]) => new Set(tri(k, a, b).map(fret))), new Set(vii.map(fret))];
+    const keyPcs = new Set(keySets.flatMap(s => [...s]));
+    const kp = [...keyPts].map(s => xy(s.split(',').map(Number)));
+    const cx = kp.reduce((s, p) => s + p[0], 0) / kp.length, cy = kp.reduce((s, p) => s + p[1], 0) / kp.length;
+    const placed = new Map();
+    keyTris.forEach(([k, a, b, rn]) => placed.set(`${fret(tri(k, a, b)[0])}|${k === 'up' ? '' : 'm'}`, [0, rn, [k, a, b]]));
+    placed.set(`${fret(vii[0])}|°`, [0, rnOf('vii°'), ['dim', ...vii[0]]]);
+    const todo = [];
+    for (let r = 0; r < 12; r++) for (const q of ['', 'm']) {
+      if (placed.has(`${r}|${q}`)) continue;
+      const pcs = new Set((q === '' ? [0, 4, 7] : [0, 3, 7]).map(d => (r + d) % 12));
+      const order = Math.max(...keySets.map(ks => [...pcs].filter(x => ks.has(x)).length)) >= 2 ? 1
+        : [...pcs].some(x => keyPcs.has(x)) ? 2 : 3;               // 3: shares no note with the key
+      todo.push([order, r, q]);
+    }
+    todo.sort((x, y) => x[0] - y[0] || x[1] - y[1] || (x[2] < y[2] ? -1 : x[2] > y[2] ? 1 : 0));
+    for (const [order, r, q] of todo) {
+      // third-order chords touch no key point; place them against the chords already placed
+      const near = new Set(order === 3 ? [...placed.values()].filter(v => v[2][0] !== 'dim').flatMap(v => tri(...v[2]).map(id)) : []);
+      const rowsB = new Set([...near].map(s => +s.split(',')[1]));      // stay inside the rows already in use
+      const k = q === '' ? 'up' : 'dn';
+      let best = null;
+      for (let a = M[0] - 9; a <= M[0] + 9; a++) for (let b = M[1] - 4; b <= M[1] + 4; b++) {
+        const pts = tri(k, a, b);
+        if (fret(pts[0]) !== r) continue;
+        const c = pts.map(xy), mx = (c[0][0] + c[1][0] + c[2][0]) / 3 - cx, my = (c[0][1] + c[1][1] + c[2][1]) / 3 - cy;
+        const sc = [-pts.filter(p => keyPts.has(id(p))).length, near.size ? pts.filter(p => !rowsB.has(p[1])).length : 0, -pts.filter(p => near.has(id(p))).length, mx * mx + my * my];
+        const lt = (u, w) => { for (let i = 0; i < u.length; i++) if (u[i] !== w[i]) return u[i] < w[i]; return false; };
+        if (!best || lt(sc, best[0])) best = [sc, [k, a, b]];
+      }
+      placed.set(`${r}|${q}`, [order, '', best[1]]);
+    }
+    const fx = new Set(X.map(fret)), rows = [];
+    const keyChords = [...placed].filter(([, v]) => v[0] === 0).map(([k]) => { const [r, q] = k.split('|'); return chord(+r, q); });
+    placed.forEach(([order, rn, place], key) => {
+      const [r, q] = key.split('|'), Y = chord(+r, q), v = vl(X, Y), t = td(X, Y), t12 = td12(X, Y).total;
+      const tdKey = Math.min(...keyChords.map(K => td(K, Y).total));    // TD to the nearest chord of the key
+      rows.push({ root: +r, kind: q, order, key: rn, home: +r === root && q === kind, place,
+        chord: q === '°' ? name(+r, q) : spell(...tri(...place)[0]) + q,
+        alt: q === '°' ? '' : (names(tri(...place)[0])[1] || '') && names(tri(...place)[0])[1] + q,
+        shared: Y.map(fret).filter(f => fx.has(f)).length, vl: v.total, td: t.total, tdKey, td12: t12,
+        vlMoves: v.moves, tdMoves: t.moves, group: group(v.total, t12) });
+    });
+    return rows.sort((a, b) => a.order - b.order || a.td12 - b.td12 || a.vl - b.vl || a.chord.localeCompare(b.chord));
+  }
+  // the torus tile around the key (chord_distance.tile): every chord once; copies outside it are dimmed
+  function tile(rows) {
+    const key = rows.filter(r => r.order === 0 && r.place[0] !== 'dim').map(r => r.place);
+    const b0 = key[0][2], a0 = Math.min(...key.filter(p => p[0] === 'up').map(p => p[1]));
+    const row = (b, a, k) => { const out = [];
+      while (out.length < 9) { out.push([k, a, b].join(',')); [k, a] = k === 'up' ? ['dn', a] : ['up', a + 1]; }
+      return out; };
+    return new Set([...row(b0 - 1, a0 - 1, 'up'), ...key.map(p => p.join(',')), ...row(b0 + 1, a0 - 2, 'dn')]);
+  }
+  // the shared colour code (chord_distance.colour), two modes, both "deep = close":
+  // The book's shared visual code (chord_distance.ENCODING; PALETTE is written by chord_distance.py).
+  // Two quantities, two channels: one on a continuous colour map, the other as a pattern level.
+  // The reader's choice is kept in localStorage and applied to every chart and widget.
+  const PALETTE = /*PALETTE*/{"default": {"cmap": "parula", "colour_by": "td", "pattern": "dots", "reverse": false, "note_colour": false}, "range": {"td": [0.0, 12.0], "vl": [0.0, 6.0]}, "smoothMax": 2, "vlDots": [0, 0, 0, 1, 2, 3, 5], "etdFret": [0.0007, 4.0374, 3.1718, 2.4552, 2.3709, 1.6022, 5.2368, 1.6022, 2.3709, 2.4552, 3.1718, 4.0374], "bands": [[5.5, "near"], [7.5, "far"], [null, "remote"]], "cmaps": {"parula": {"label": "Parula", "stops": ["#352a87", "#3636a0", "#3243b9", "#2152d3", "#0462e1", "#046ce0", "#0c74dd", "#127cd8", "#1484d4", "#118dd2", "#0a97d1", "#069fce", "#06a6c7", "#09abbf", "#13b0b6", "#22b4ab", "#34b8a0", "#49bb94", "#60be88", "#77bf7e", "#8dbf75", "#a0be6d", "#b3bd65", "#c4bc5f", "#d4bb58", "#e4b950", "#f4ba47", "#fec03b", "#fdca31", "#f9d528", "#f5e020", "#f5ed17", "#f9fb0e"]}, "viridis": {"label": "Viridis", "stops": ["#440154", "#470d60", "#48186a", "#482374", "#472d7b", "#453781", "#424086", "#3e4989", "#3b528b", "#375b8d", "#33638d", "#2f6b8e", "#2c728e", "#297a8e", "#26828e", "#23898e", "#21918c", "#1f988b", "#1fa088", "#22a785", "#28ae80", "#32b67a", "#3fbc73", "#4ec36b", "#5ec962", "#70cf57", "#84d44b", "#98d83e", "#addc30", "#c2df23", "#d8e219", "#ece51b", "#fde725"]}, "cividis": {"label": "Cividis (colour-blind safe)", "stops": ["#00224e", "#00285b", "#002e6a", "#053371", "#1a386f", "#273e6e", "#32436d", "#3b496c", "#434e6c", "#4b546c", "#535a6d", "#5a5f6e", "#61656f", "#686a71", "#6f7073", "#767676", "#7d7c78", "#848279", "#8c8878", "#938e78", "#9b9476", "#a39a74", "#aba072", "#b4a76f", "#bcae6c", "#c4b468", "#cdbb63", "#d5c25e", "#dec958", "#e7d150", "#f0d846", "#f9e03a", "#fee838"]}, "plasma": {"label": "Plasma", "stops": ["#0d0887", "#20068f", "#2f0596", "#3c049b", "#4903a0", "#5502a4", "#6100a7", "#6c00a8", "#7801a8", "#8305a7", "#8e0ca4", "#9814a0", "#a21d9a", "#ab2494", "#b42e8d", "#bc3587", "#c43e7f", "#cb4679", "#d24f71", "#d8576b", "#de6164", "#e4695e", "#e97257", "#ee7b51", "#f3854b", "#f79044", "#f99a3e", "#fca537", "#fdaf31", "#febb2b", "#fdc627", "#fbd324", "#f8df25"]}, "magma": {"label": "Magma", "stops": ["#331067", "#3d0f71", "#471078", "#52137c", "#5c167f", "#651a80", "#701f81", "#792282", "#832681", "#8c2981", "#982d80", "#a1307e", "#ab337c", "#b73779", "#c03a76", "#ca3e72", "#d5446d", "#de4968", "#e55064", "#ed5a5f", "#f2645c", "#f66e5c", "#f97b5d", "#fb8761", "#fd9266", "#fe9f6d", "#feaa74", "#feb67c", "#fec287", "#fecd90", "#fed89a", "#fde5a7", "#fcf0b2"]}, "inferno": {"label": "Inferno", "stops": ["#2b0b57", "#360961", "#420a68", "#4c0c6b", "#57106e", "#61136e", "#6a176e", "#751b6e", "#7f1e6c", "#8a226a", "#932667", "#9d2964", "#a82e5f", "#b1325a", "#bc3754", "#c43c4e", "#cc4248", "#d54a41", "#dd513a", "#e45a31", "#ea632a", "#ef6c23", "#f37819", "#f78212", "#f98e09", "#fb9906", "#fca50a", "#fcb216", "#fbbe23", "#f9cb35", "#f6d746", "#f3e35a", "#f1ef75"]}, "grey": {"label": "Grey", "stops": ["#393939", "#414141", "#484848", "#515151", "#575757", "#5e5e5e", "#646464", "#6a6a6a", "#707070", "#777777", "#7d7d7d", "#848484", "#8a8a8a", "#919191", "#979797", "#9e9e9e", "#a5a5a5", "#adadad", "#b4b4b4", "#bbbbbb", "#c1c1c1", "#c6c6c6", "#cccccc", "#d1d1d1", "#d6d6d6", "#dbdbdb", "#dfdfdf", "#e3e3e3", "#e7e7e7", "#ececec", "#f0f0f0", "#f3f3f3", "#f6f6f6"]}}, "patterns": {"dots": "Dots"}}/*END PALETTE*/;
+  const BANDS = PALETTE.bands.map(([hi, b]) => [hi == null ? Infinity : hi, b]);
+  const ENC = Object.assign({}, PALETTE.default);
+  try { Object.assign(ENC, JSON.parse(localStorage.getItem('hgb-encoding-v2') || '{}')); } catch (e) { /* no storage */ }
+  if (!PALETTE.cmaps[ENC.cmap]) ENC.cmap = PALETTE.default.cmap;
+  if (!PALETTE.patterns[ENC.pattern]) ENC.pattern = PALETTE.default.pattern;
+  if (typeof ENC.note_colour !== 'boolean') ENC.note_colour = PALETTE.default.note_colour !== false;
+  const band = t => BANDS.find(([hi]) => t < hi)[1];
+  const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const rgb2hex = c => '#' + c.map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+  const cmapAt = (x, key = ENC.cmap) => {             // x in [0, 1] -> hex on the chosen map
+    const st = PALETTE.cmaps[key].stops, f = Math.min(1, Math.max(0, ENC.reverse ? 1 - x : x)) * (st.length - 1);
+    const i = Math.min(Math.floor(f), st.length - 2), c0 = hex2rgb(st[i]), c1 = hex2rgb(st[i + 1]);
+    return rgb2hex(c0.map((v, j) => v + (c1[j] - v) * (f - i)));
+  };
+  const norm = (q, val) => { const [lo, hi] = PALETTE.range[q]; return (val - lo) / (hi - lo); };
+  const colourOf = (v, t) => cmapAt(norm(ENC.colour_by, ENC.colour_by === 'td' ? t : v));
+  // dot density 0-6: VL through vlDots (none while smooth, VL <= 2), or TD by band (near 0, far 3, remote 6) when VL is the colour
+  const VL_DOTS = PALETTE.vlDots;
+  const level = (v, t) => ENC.colour_by === 'td' ? VL_DOTS[Math.max(0, Math.min(VL_DOTS.length - 1, Math.round(v)))] : [0, 3, 6][BANDS.findIndex(([hi]) => t < hi)];
+  const lum = h => { const [r, g, b] = hex2rgb(h).map(x => x / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const inkOf = h => lum(h) > 0.45 ? 'rgba(0,0,0,0.42)' : 'rgba(255,255,255,0.62)';
+  const levelText = () => ENC.colour_by === 'td' ? [`0–${PALETTE.smoothMax}`, ...VL_DOTS.slice(PALETTE.smoothMax + 1).map((_, i) => String(PALETTE.smoothMax + 1 + i))]
+    : ['near (TD < 5.5)', 'far (TD 5.5–7.5)', 'remote (TD ≥ 7.5)'];
+  const QUANT = { td: 'TD, how far the harmony moves', vl: 'VL, how far the fingers move' };
+  const style = (v, t) => ({ band: band(t), smooth: v <= PALETTE.smoothMax });
+  const colour = (v, t) => [colourOf(v, t), false];
+  return { NAMES, chord, name, vl, td, neighbours, neighbourhood, tile, degree, degreeOf, names, kees, pcTD, td12, tri, xy, spell, fret, group, keyOf, colour, style, PALETTE, BANDS, ENC, cmapAt,
+           colourOf, level, inkOf, levelText, QUANT, band };
+})();
+
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
+  const el = (tag, attrs = {}, ...kids) => {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) k === 'class' ? (e.className = v) : e.setAttribute(k, v);
+    kids.flat().forEach(c => e.append(c));
+    return e;
+  };
+  const fmtVL = m => m.length ? m.map(x => `${x.from}→${x.to} (${x.cost})`).join(', ') : 'none';
+  const fmtTD = m => m.length ? m.map(x => `${x.from}→${x.to} (limit ${x.limit})`).join(', ') : 'none';
+
+  // ---------------------------------------------------------------- sortable tables
+  const num = s => {
+    const m = s.replace(/−/g, '-').replace(/,/g, '').match(/^[^\d\-+.]*([-+]?\d*\.?\d+)/);
+    return m ? parseFloat(m[1]) : NaN;
+  };
+  function makeSortable(table) {
+    const head = table.tHead || table.querySelector('tr');
+    const body = table.tBodies[0];
+    if (!head || !body) return;
+    const original = [...body.rows];
+    const ths = [...(head.rows ? head.rows[0].cells : head.cells)];
+    ths.forEach((th, ci) => {
+      th.classList.add('sortable');
+      th.title = 'Click to sort';
+      th.addEventListener('click', () => {
+        const state = th.dataset.sort === 'asc' ? 'desc' : th.dataset.sort === 'desc' ? '' : 'asc';
+        ths.forEach(t => delete t.dataset.sort);
+        if (state) th.dataset.sort = state;
+        let rows = [...original];
+        if (state) {
+          const vals = rows.map(r => (r.cells[ci] ? r.cells[ci].textContent.trim() : ''));
+          const numeric = vals.filter(v => v).every(v => !isNaN(num(v)));
+          rows = rows.map((r, i) => [r, vals[i]]).sort((a, b) => {
+            const c = numeric ? num(a[1]) - num(b[1]) : a[1].localeCompare(b[1]);
+            return state === 'asc' ? c : -c;
+          }).map(x => x[0]);
+        }
+        rows.forEach(r => body.append(r));
+      });
+    });
+  }
+  document.querySelectorAll('main table').forEach(makeSortable);
+
+  // ---------------------------------------------------------------- contents sidebar
+  const toc = document.getElementById('toc');
+  if (toc) {
+    const list = el('ul');
+    document.querySelectorAll('main h2, main h3').forEach(h => {
+      if (!h.id) return;
+      list.append(el('li', { class: h.tagName.toLowerCase() }, el('a', { href: '#' + h.id }, h.textContent)));
+    });
+    toc.append(list);
+    const links = [...toc.querySelectorAll('a')];
+    const spy = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      links.forEach(a => a.classList.toggle('here', a.getAttribute('href') === '#' + e.target.id));
+    }), { rootMargin: '0px 0px -80% 0px' });
+    document.querySelectorAll('main h2[id], main h3[id]').forEach(h => spy.observe(h));
+    document.getElementById('toc-toggle').addEventListener('click', () => document.body.classList.toggle('toc-open'));
+  }
+
+  // ---------------------------------------------------------------- inline charts
+  // book_html.py stores each SVG chart gzipped in data-gz (keeps the file under Signal's 8 MB cap)
+  document.querySelectorAll('img[data-gz]').forEach(async img => {
+    const bytes = Uint8Array.from(atob(img.dataset.gz), c => c.charCodeAt(0));
+    const svg = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).blob();
+    img.src = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+    img.removeAttribute('data-gz');
+  });
+
+  // ---------------------------------------------------------------- image zoom
+  const box = el('div', { id: 'zoom' });
+  document.body.append(box);
+  box.addEventListener('click', () => box.classList.remove('on'));
+  document.querySelectorAll('main img').forEach(img => img.addEventListener('click', () => {
+    box.replaceChildren(el('img', { src: img.src }));
+    box.classList.add('on');
+  }));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') box.classList.remove('on'); });
+
+  // ---------------------------------------------------------------- widgets
+  const chordSelect = (val, kinds = ['', 'm']) => {
+    const s = el('select');
+    for (const k of kinds) for (let r = 0; r < 12; r++) {
+      const o = el('option', { value: `${r}|${k}` }, CD.name(r, k));
+      if (`${r}|${k}` === val) o.selected = true;
+      s.append(o);
+    }
+    return s;
+  };
+  const parse = v => { const [r, k] = v.split('|'); return [+r, k]; };
+  const calculators = [];
+  const rerenders = [];
+  // ---------------------------------------------------------------- the shared encoding
+  // Each SVG gets pattern defs for level 1 (sparse) and 2 (dense) in two inks (dark on light fills,
+  // light on dark ones); a chord is its colour polygon plus, if its level > 0, an overlay polygon.
+  let patSeq = 0;
+  const NS = 'http://www.w3.org/2000/svg';
+  const sv = (tag, attrs) => { const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+  const patternDefs = (svg, unit) => {           // returns (level, ink) -> 'url(#…)'; dots, 6 densities
+    const defs = sv('defs', {}), ids = {};
+    for (let lv = 1; lv <= 6; lv++) for (const ink of ['rgba(0,0,0,0.42)', 'rgba(255,255,255,0.62)']) {
+      const id = `pat-${++patSeq}`, u = unit * 1.7 / Math.sqrt(lv), r = unit * 0.075;   // dots per area ∝ level
+      const pat = sv('pattern', { id, width: u, height: u, patternUnits: 'userSpaceOnUse' });
+      pat.append(sv('circle', { cx: u / 2, cy: u / 2, r, fill: ink }));
+      defs.append(pat); ids[`${lv}|${ink}`] = `url(#${id})`;
+    }
+    svg.prepend(defs);
+    return (lv, fill) => ids[`${lv}|${CD.inkOf(fill)}`];
+  };
+  // append a shape (polygon points) painted in the encoding; returns the colour used
+  const paintShape = (parent, pat, points, v, t, attrs = {}) => {
+    const fill = CD.colourOf(v, t), lv = CD.level(v, t);
+    parent.append(sv('polygon', { points, fill, ...attrs }));
+    if (lv) parent.append(sv('polygon', { points, fill: pat(lv, fill), stroke: 'none', 'pointer-events': 'none', class: 'pat' }));
+    return fill;
+  };
+  const patternCss = (lv) => {
+    if (!lv) return '#c9ced6';
+    const g = 10 / Math.sqrt(lv);
+    return `radial-gradient(rgba(0,0,0,0.55) 1.1px, transparent 1.5px) 0 0 / ${g}px ${g}px, #c9ced6`;
+  };
+  // legend: colour bar for the coloured quantity + one grey swatch per pattern level
+  const colourLegend = (extra) => {
+    const q = CD.ENC.colour_by, [lo, hi] = CD.PALETTE.range[q];
+    const grad = Array.from({ length: 21 }, (_, i) => CD.cmapAt(i / 20)).join(', ');
+    const bar = el('div', { class: 'enc-bar', style: `background:linear-gradient(90deg, ${grad})` });
+    if (q === 'td') [[0, 5.5, 'near'], [5.5, 7.5, 'far'], [7.5, hi, 'remote']].forEach(([a, b, s]) =>
+      bar.append(el('span', { style: `left:${(a - lo) / (hi - lo) * 100}%;width:${(b - a) / (hi - lo) * 100}%` }, s)));
+    const ticks = el('div', { class: 'enc-ticks' });
+    for (let x = Math.ceil(lo); x <= hi; x++) ticks.append(el('span', { style: `left:${(x - lo) / (hi - lo) * 100}%` }, x === hi ? `${x}+` : String(x)));
+    const lvls = q === 'td' ? CD.PALETTE.vlDots.slice(CD.PALETTE.smoothMax) : [0, 3, 6];
+    const pats = el('div', { class: 'enc-pats' }, el('div', { class: 'enc-k' }, 'dots = ' + (q === 'td' ? CD.QUANT.vl + ' (frets: none while smooth, then more dots, more movement)' : CD.QUANT.td)),
+      ...CD.levelText().map((s, i) => el('span', { class: 'enc-sw' }, el('i', { style: `background:${patternCss(lvls[i])}` }), s)));
+    return [el('div', { class: 'enc-legend' },
+      el('div', { class: 'enc-cb' }, el('div', { class: 'enc-k' }, 'colour = ' + CD.QUANT[q]), bar, ticks), pats,
+      el('span', { class: 'pm-x' }, el('b', { style: 'color:#d69e2e' }, '★'), ' home chord and its root note  ·  ', sw('#fff', '#000'), extra))];
+  };
+  // the settings: one set of controls, shown inline where the code is introduced and in a floating
+  // panel everywhere else; any change is saved and redraws every widget
+  const settingsForms = [];
+  const settingsForm = () => {
+    const mk = (key, opts) => { const s = el('select', { 'data-k': key });
+      opts.forEach(([v, lab]) => { const o = el('option', { value: v }, lab); if (String(CD.ENC[key]) === v) o.selected = true; s.append(o); });
+      s.addEventListener('change', () => setEnc({ [key]: s.value === 'true' ? true : s.value === 'false' ? false : s.value })); return s; };
+    const f = el('div', { class: 'enc-form' },
+      el('label', {}, 'Colour shows ', mk('colour_by', [['td', 'TD: how far the harmony moves'], ['vl', 'VL: how far the fingers move']])),
+      el('label', {}, 'Colour map ', mk('cmap', Object.entries(CD.PALETTE.cmaps).map(([k, v]) => [k, v.label]))),
+      el('label', {}, 'Direction ', mk('reverse', [['false', 'near = first colour'], ['true', 'reversed']])),
+      el('label', {}, 'Colour the notes ', mk('note_colour', [['true', 'on'], ['false', 'off']])),
+      el('button', { class: 'nm-btn', type: 'button' }, 'Reset'));
+    f.querySelector('button').addEventListener('click', () => setEnc(Object.assign({}, CD.PALETTE.default)));
+    settingsForms.push(f);
+    return f;
+  };
+  function setEnc(change) {
+    Object.assign(CD.ENC, change);
+    try { localStorage.setItem('hgb-encoding-v2', JSON.stringify(CD.ENC)); } catch (e) { /* no storage */ }
+    settingsForms.forEach(f => f.querySelectorAll('select').forEach(s => { s.value = String(CD.ENC[s.dataset.k]); }));
+    rerenders.forEach(r => r());
+  }
+  const sw = (bg, border) => el('i', { style: `background:${bg}${border ? ';border:2px solid ' + border : ''}` });
+
+  function calculator(host) {
+    const a = chordSelect(host.dataset.from || '0|', ['', 'm', '°']), b = chordSelect(host.dataset.to || '7|', ['', 'm', '°']);
+    const out = el('div', { class: 'cd-out' });
+    host.append(el('div', { class: 'cd-row' }, el('label', {}, 'From ', a), el('label', {}, 'to ', b)), out);
+    const render = () => {
+      const [r1, k1] = parse(a.value), [r2, k2] = parse(b.value);
+      const X = CD.chord(r1, k1), Y = CD.chord(r2, k2);
+      const v = CD.vl(X, Y), t = CD.td(X, Y), t12 = CD.td12(X, Y);
+      const shared = new Set(v.pairs.filter(([x, y]) => x === y).map(p => p[0])).size;
+      out.replaceChildren(
+        el('div', { class: 'cd-card' }, el('div', { class: 'cd-k' }, 'VL (frets)'),
+          el('div', { class: 'cd-v' }, String(v.total)), el('div', { class: 'cd-m' }, fmtVL(v.moves))),
+        el('div', { class: 'cd-card' }, el('div', { class: 'cd-k' }, 'TD in 12-TET (Appendix B)'),
+          el('div', { class: 'cd-v' }, t12.total.toFixed(2)), el('div', { class: 'cd-m' }, `pure tuning: ${t.total.toFixed(2)} · ${fmtTD(t.moves)}`)),
+        el('div', { class: 'cd-card' }, el('div', { class: 'cd-k' }, 'Shared notes'),
+          el('div', { class: 'cd-v' }, String(shared)),
+          el('div', { class: 'cd-m' }, shared ? CD.group(v.total, t12.total) : 'no common note')));
+    };
+    a.addEventListener('change', render); b.addEventListener('change', render);
+    render();
+    calculators.push({ set: (from, to) => { a.value = from; b.value = to; render(); } });
+  }
+
+  function neighboursChart(host) {
+    const sel = chordSelect(host.dataset.from || '0|');
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const W = 720, H = 440, m = { l: 56, r: 20, t: 16, b: 48 };
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'cd-svg');
+    const tip = el('div', { class: 'cd-tip' });
+    const table = el('table');
+    const legendBox = el('div', { class: 'cd-legend' });
+    host.append(el('div', { class: 'cd-row' }, el('label', {}, 'From ', sel), el('label', {}, 'Show ', scopeSelect()),
+      el('span', { class: 'cd-hint' }, 'hover a chord for its moves; click it to load the calculator')),
+      legendBox, el('div', { class: 'cd-plot' }, svg, tip), table);
+    const S = (tag, attrs) => { const e = document.createElementNS(svgNS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+    const render = () => {
+      const [r0, k0] = parse(sel.value);
+      const rows = CD.neighbourhood(r0, k0).filter(r => !r.home && r.order <= scope);
+      const xmax = Math.max(5, ...rows.map(r => r.vl)), ymax = Math.ceil(Math.max(...rows.map(r => r.td12)) + 0.5);
+      const ymin = Math.floor(Math.min(...rows.map(r => r.td12)) - 0.5);
+      const X = v => m.l + (v - 0.5) / (xmax) * (W - m.l - m.r);
+      const Y = v => H - m.b - (v - ymin) / (ymax - ymin) * (H - m.t - m.b);
+      svg.replaceChildren();
+      const pat = patternDefs(svg, 7);
+      for (let y = ymin; y <= ymax; y++) {
+        svg.append(S('line', { x1: m.l, x2: W - m.r, y1: Y(y), y2: Y(y), class: 'g' }));
+        const t = S('text', { x: m.l - 8, y: Y(y) + 4, class: 'ax', 'text-anchor': 'end' }); t.textContent = y; svg.append(t);
+      }
+      for (let x = 1; x <= xmax; x++) {
+        const t = S('text', { x: X(x), y: H - m.b + 18, class: 'ax', 'text-anchor': 'middle' }); t.textContent = x; svg.append(t);
+      }
+      svg.append(S('line', { x1: X(2.5), x2: X(2.5), y1: m.t, y2: H - m.b, class: 'q' }));
+      [5.5, 7.5].forEach(yv => svg.append(S('line', { x1: m.l, x2: W - m.r, y1: Y(yv), y2: Y(yv), class: 'q' })));
+      const lab = (x, y, s, a) => { const t = S('text', { x, y, class: 'ql', 'text-anchor': a }); t.textContent = s; svg.append(t); };
+      lab(m.l + 8, m.t + 14, 'smooth, remote', 'start'); lab(W - m.r - 4, m.t + 14, 'leap, remote', 'end');
+      lab(m.l + 8, H - m.b - 8, 'smooth, near', 'start'); lab(W - m.r - 4, H - m.b - 8, 'leap, near', 'end');
+      const xl = S('text', { x: (m.l + W - m.r) / 2, y: H - 8, class: 'ax', 'text-anchor': 'middle' });
+      xl.textContent = 'VL: frets moved (smooth → leap)'; svg.append(xl);
+      const yl = S('text', { x: 14, y: (m.t + H - m.b) / 2, class: 'ax', 'text-anchor': 'middle',
+        transform: `rotate(-90 14 ${(m.t + H - m.b) / 2})` });
+      yl.textContent = 'TD: log₂ odd limit (near → far)'; svg.append(yl);
+      const spots = {};
+      rows.forEach(r => (spots[`${r.vl}|${r.td12.toFixed(2)}`] ||= []).push(r));
+      Object.values(spots).forEach(rs => rs.sort((a, b) => a.chord.localeCompare(b.chord)).forEach((r, i) => {
+        const cx = X(r.vl) + (i - (rs.length - 1) / 2) * (rs.some(x => x.key) ? 56 : 32), cy = Y(r.td12), s = 9;
+        const pts = r.kind === 'm' ? `${cx - s},${cy - s * 0.7} ${cx + s},${cy - s * 0.7} ${cx},${cy + s}`
+          : r.kind === '°' ? `${cx},${cy - s} ${cx + s * 0.8},${cy} ${cx},${cy + s} ${cx - s * 0.8},${cy}`
+          : `${cx - s},${cy + s * 0.7} ${cx + s},${cy + s * 0.7} ${cx},${cy - s}`;
+        const g = S('g', { class: 'pt' });
+        g.append(S('circle', { cx, cy, r: 18, class: 'hit' }));
+        const fc = paintShape(g, pat, pts, r.vl, r.td12);
+        g.append(S('polygon', { points: pts, fill: 'none', stroke: r.key ? '#000' : fc, 'stroke-width': r.key ? 2.5 : 1.2 }));
+        const t = S('text', { x: cx, y: cy - 14, class: 'pl', 'text-anchor': 'middle' }); t.textContent = r.chord + (r.key ? ` (${r.key})` : ''); g.append(t);
+        g.addEventListener('mouseenter', () => {
+          tip.innerHTML = `<b>${CD.name(r0, k0)} → ${r.chord}</b>${r.key ? ' (' + r.key + ')' : ''} · shares ${r.shared}<br>VL ${r.vl}: ${fmtVL(r.vlMoves)}<br>TD ${r.td12.toFixed(2)} in 12-TET (pure ${r.td.toFixed(2)}): ${fmtTD(r.tdMoves)}`;
+          tip.style.left = `${cx / W * 100}%`; tip.style.top = `${cy / H * 100}%`; tip.classList.add('on');
+        });
+        g.addEventListener('mouseleave', () => tip.classList.remove('on'));
+        g.addEventListener('click', () => calculators.forEach(c => c.set(sel.value, `${r.root}|${r.kind}`)));
+        svg.append(g);
+      }));
+      table.replaceChildren(el('thead', {}, el('tr', {}, ...['Chord', 'In key', 'Order', 'Shared with home', 'VL', 'VL moves', 'TD (12-TET)', 'TD (pure)', 'TD moves (odd limit)', 'TD to key', 'Group'].map(h => el('th', {}, h)))),
+        el('tbody', {}, ...rows.sort((a, b) => a.td - b.td || a.vl - b.vl).map(r => el('tr', {},
+          el('td', {}, r.chord + (r.alt ? ' / ' + r.alt : '')), el('td', {}, r.key), el('td', {}, String(r.order)), el('td', {}, String(r.shared)), el('td', {}, String(r.vl)), el('td', {}, fmtVL(r.vlMoves)),
+          el('td', {}, r.td12.toFixed(2)), el('td', {}, r.td.toFixed(2)), el('td', {}, fmtTD(r.tdMoves)), el('td', {}, r.tdKey.toFixed(2)), el('td', {}, r.group)))));
+      makeSortable(table);
+      legendBox.replaceChildren(...colourLegend('in the key  ·  ▲ major ▼ minor ◆ diminished'));
+    };
+    sel.addEventListener('change', render);
+    rerenders.push(render);
+    render();
+  }
+
+  // ---------------------------------------------------------------- neighbourhood scope
+  // how far out from the key the distance charts colour and label: 0 key, 1 + edge, 2 + note
+  let scope = 3;
+  const scopeSelects = [];
+  const SCOPES = [['0', 'the key only'], ['1', '+ chords sharing an edge with the key (1st order)'], ['2', '+ chords sharing a note with the key (2nd order)'], ['3', '+ the rest, sharing no note (3rd order): every chord']];
+  const scopeSelect = () => {
+    const s = el('select');
+    SCOPES.forEach(([v, lab]) => { const o = el('option', { value: v }, lab); if (+v === scope) o.selected = true; s.append(o); });
+    s.addEventListener('change', () => { scope = +s.value; scopeSelects.forEach(x => { x.value = s.value; }); rerenders.forEach(r => r()); });
+    scopeSelects.push(s);
+    return s;
+  };
+  const ORDER = ['key', '1st: shares an edge', '2nd: shares a note', '3rd: shares no note'];
+
+  // ---------------------------------------------------------------- neighbourhood map (grid)
+  // The home chord's key and its neighbourhood on the flat grid (port of key_neighbours.grid).
+  // Click a coloured chord: it becomes home (with its own key) and the move joins the trail.
+  function neighbourMap(host) {
+    const S = (tag, attrs, text) => { const e = sv(tag, attrs); if (text != null) e.textContent = text; return e; };
+    const sel = chordSelect(host.dataset.from || '0|');
+    const reset = el('button', { class: 'nm-btn' }, 'Clear trail');
+    const trail = el('div', { class: 'nm-trail' });
+    const svg = S('svg', { class: 'nm-svg' });
+    const legendBox = el('div', { class: 'cd-legend' });
+    const tip = el('div', { class: 'cd-tip' });
+    host.append(el('div', { class: 'cd-row' }, el('label', {}, 'Home chord ', sel), el('label', {}, 'Show ', scopeSelect()), reset),
+      el('div', { class: 'cd-hint' }, 'Click a coloured chord to move there; hover for its moves.'),
+      legendBox, trail, el('div', { class: 'cd-plot' }, svg, tip));
+    let path = [];
+    const showTrail = () => {
+      const tv = path.reduce((s, x) => s + x.vl, 0), tt = path.reduce((s, x) => s + x.td, 0);
+      trail.textContent = path.length ? `Progression: ${path[0].from} → ${path.map(x => `${x.name} (${x.vl} | ${x.td.toFixed(1)})`).join(' → ')}   ·   total VL ${tv}, TD ${tt.toFixed(1)}`
+        : 'Progression: click a chord to start.';
+    };
+    reset.addEventListener('click', () => { path = []; showTrail(); });
+    const id = p => p[0] + ',' + p[1];
+
+    function render() {
+      const [r0, k0] = parse(sel.value), nm = CD.name(r0, k0);
+      const rows = CD.neighbourhood(r0, k0), tris = rows.filter(r => r.place[0] !== 'dim');
+      const homePts = new Set(CD.chord(r0, k0).map(id));
+      const allp = tris.flatMap(r => CD.tri(...r.place));
+      const b0 = Math.min(...allp.map(p => p[1])), b1 = Math.max(...allp.map(p => p[1]));
+      const X0 = Math.min(...allp.map(p => CD.xy(p)[0])) - 0.2, X1 = Math.max(...allp.map(p => CD.xy(p)[0])) + 0.2;
+      const pts = [], has = new Set();
+      for (let b = b0; b <= b1; b++) for (let a = -30; a <= 30; a++) { const x = CD.xy([a, b])[0]; if (x >= X0 && x <= X1) { pts.push([a, b]); has.add(id([a, b])); } }
+      const P = p => { const [x, y] = CD.xy(p); return [x, -y]; };
+      const xs = pts.map(p => P(p)[0]), ys = pts.map(p => P(p)[1]);
+      const minx = Math.min(...xs) - 0.5, miny = Math.min(...ys) - 0.5;
+      svg.setAttribute('viewBox', `${minx} ${miny} ${Math.max(...xs) + 1.9 - minx} ${Math.max(...ys) + 0.95 - miny}`);
+      svg.replaceChildren();
+      const fs = 0.2, pat = patternDefs(svg, 0.17);
+      // every whole triangle in the window that is the same chord (same frets) as a row is painted:
+      // on a guitar a comma copy is the same chord, so it gets the same colour and label
+      const byId = new Map(tris.map(r => [`${r.root}|${r.kind}`, r]));
+      const T = CD.tile(rows);           // the whole-map tile: every chord once; other copies are faded (Zahid 2026-10-19)
+      const shown = [];
+      for (let b = b0 - 1; b <= b1; b++) for (let a = -30; a <= 30; a++) ['up', 'dn'].forEach(k => {
+        const q = CD.tri(k, a, b);
+        if (!q.every(p => has.has(id(p)))) return;
+        const r = byId.get(`${CD.fret(q[0])}|${k === 'up' ? '' : 'm'}`);
+        if (r && r.order <= scope) shown.push({ ...r, place: [k, a, b], star: r.home && q.every(p => homePts.has(id(p))), rep: !T.has([k, a, b].join(',')) });
+      });
+      shown.forEach(r => {
+        const c = CD.tri(...r.place).map(P), cx = (c[0][0] + c[1][0] + c[2][0]) / 3, cy = (c[0][1] + c[1][1] + c[2][1]) / 3;
+        const g = S('g', { class: r.home ? '' : 'nm-t' });
+        const fc = paintShape(g, pat, c.map(q => q.join(',')).join(' '), r.home ? 0 : r.vl, r.home ? 0 : r.td12, { stroke: 'none', 'stroke-width': fs * 0.1 });
+        const dark = CD.inkOf(fc).startsWith('rgba(255');
+        const lab = { fill: dark ? '#ffffff' : '#111827', 'text-anchor': 'middle' };
+        if (r.star) g.append(S('text', { x: cx, y: cy - fs * 1.1, 'font-size': fs * 1.4, 'text-anchor': 'middle', fill: '#d69e2e' }, '★'));
+        const cn = CD.names(CD.tri(...r.place)[0]).map(n => n + r.kind).join(' / ');   // both names if the root has two
+        g.append(S('text', { x: cx, y: cy, 'font-size': cn.includes('/') ? fs * 0.85 : fs, 'font-weight': 700, ...lab }, cn + (r.key ? ` (${r.key})` : '')));
+        g.append(S('text', { x: cx, y: cy + fs * 0.95, 'font-size': fs * 0.68, 'font-weight': 500, ...lab }, r.home ? 'home' : `${r.vl} | ${r.td12.toFixed(1)}`));
+        if (r.rep) g.append(S('polygon', { points: c.map(q => q.join(',')).join(' '), fill: '#fff', 'fill-opacity': 0.62, 'pointer-events': 'none' }));
+        if (!r.home) {
+          g.addEventListener('mouseenter', () => {
+            const hb = svg.parentNode.getBoundingClientRect(), m = svg.getScreenCTM(), pt = svg.createSVGPoint();
+            pt.x = cx; pt.y = cy; const sp = pt.matrixTransform(m);
+            tip.innerHTML = `<b>${nm} → ${r.chord}${r.alt ? ' / ' + r.alt : ''}</b>${r.key ? ' (' + r.key + ')' : ''} · ${ORDER[r.order]}<br>VL ${r.vl}: ${fmtVL(r.vlMoves)}<br>TD ${r.td12.toFixed(2)} in 12-TET (pure ${r.td.toFixed(2)}): ${fmtTD(r.tdMoves)}`;
+            tip.style.left = `${sp.x - hb.left}px`; tip.style.top = `${sp.y - hb.top}px`; tip.classList.add('on');
+          });
+          g.addEventListener('mouseleave', () => tip.classList.remove('on'));
+          g.addEventListener('click', () => {
+            tip.classList.remove('on');
+            path.push({ from: nm, name: r.chord, vl: r.vl, td: r.td12 });
+            calculators.forEach(cl => cl.set(sel.value, `${r.root}|${r.kind}`));
+            sel.value = `${r.root}|${r.kind}`; showTrail(); render();
+          });
+        }
+        svg.append(g);
+      });
+      // outlines: the key (bold black) and, when shown, the key plus its edge neighbours (dashed)
+      const outline = (places, attrs) => {
+        const cnt = new Map();
+        places.forEach(pl => { const q = CD.tri(...pl);
+          [[q[0], q[1]], [q[1], q[2]], [q[2], q[0]]].forEach(e => { const k = e.map(id).sort().join('|'); cnt.set(k, [...(cnt.get(k) || []), e]); }); });
+        cnt.forEach(es => { if (es.length !== 1) return; const [[x1, y1], [x2, y2]] = es[0].map(P);
+          svg.append(S('line', { x1, y1, x2, y2, 'stroke-linecap': 'round', ...attrs })); });
+      };
+      // every edge of the grid: solid = fifth or major third, dotted = minor third (drawn over the fills)
+      pts.forEach(([a, b]) => [[1, 0, false], [0, 1, false], [1, -1, true]].forEach(([da, db, dot]) => {
+        if (!has.has(id([a + da, b + db]))) return;
+        const [x1, y1] = P([a, b]), [x2, y2] = P([a + da, b + db]);
+        svg.append(S('line', { x1, y1, x2, y2, stroke: '#2d3748', 'stroke-opacity': 0.8, 'stroke-width': fs * (dot ? 0.1 : 0.05), 'stroke-linecap': 'round', 'stroke-dasharray': dot ? `0 ${fs * 0.2}` : '', 'pointer-events': 'none' }));
+      }));
+      outline(tris.filter(r => r.order === 0).map(r => r.place), { stroke: '#000', 'stroke-width': fs * 0.34 });
+      // the key's tritone (Zahid 2026-10-12: the thin chain was hard to see): a broad translucent red
+      // band along vii° (ii° in minor), the ↘↘ chain, and red rings on its two ends, the tritone itself
+      const v7 = rows.find(r => r.place[0] === 'dim'), [, va, vb] = v7.place;
+      const cp = [0, 1, 2].map(i => P([va + i, vb - i]));
+      svg.append(S('polyline', { points: cp.map(p => p.join(',')).join(' '), fill: 'none', stroke: '#e53e3e', 'stroke-opacity': 0.32, 'stroke-width': fs * 1.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'pointer-events': 'none' }));
+      const tt = [CD.spell(va, vb), CD.spell(va + 2, vb - 2)];
+      const lx = cp[2][0] + 0.48, ly = cp[2][1] + 0.5;              // below the chain's lower end, clear of the chords
+      [[`${v7.chord} (${v7.key})`, 0, fs, 700, '#111827'], [`tritone ${tt[0]}–${tt[1]}`, 1, fs * 0.72, 700, '#c53030'], [`${v7.vl} | ${v7.td12.toFixed(1)}`, 2, fs * 0.68, 500, '#111827']].forEach(([txt, i, f, w, c]) => svg.append(S('text', { x: lx, y: ly + fs * (i * 0.95 - 0.2), 'font-size': f, 'font-weight': w, fill: c, 'text-anchor': 'start' }, txt)));
+      const ttEnds = new Set([id([va, vb]), id([va + 2, vb - 2])]);
+      const used = new Set([...shown.filter(r => !r.rep).flatMap(r => CD.tri(...r.place).map(id)), ...[0, 1, 2].map(i => id([va + i, vb - i]))]);
+      const [ah, bh] = CD.chord(r0, k0)[0];
+      // each note: name (scale degree), one line per name if the fret has two, then VL | TD from the home root
+      pts.forEach(([a, b]) => { const [x, y] = P([a, b]), on = used.has(id([a, b])), nr = 0.4;
+        const f = CD.fret([a - ah, b - bh]), v = Math.min(f, 12 - f), t = CD.pcTD(f);   // 12-TET: one TD per fret
+        const ink = on ? '#1a202c' : '#a0aec0', mute = on ? '#52514e' : '#b8c2d0';
+        const root = a === ah && b === bh;                         // the key's root note: the only star
+        const nms = CD.names([a, b]), fa = CD.fret([a, b]);        // a fret with two names shows both
+        // the note itself can carry the code too (Display: "Colour the notes"); the text then contrasts
+        const paintNote = CD.ENC.note_colour && on;
+        let fillN = '#fff';
+        if (paintNote) {
+          fillN = CD.colourOf(v, t);
+          svg.append(S('circle', { cx: x, cy: y, r: nr, fill: fillN, stroke: '#fff', 'stroke-width': nr * 0.08 }));
+          const lv = CD.level(v, t);
+          if (lv) svg.append(S('circle', { cx: x, cy: y, r: nr, fill: pat(lv, fillN), 'pointer-events': 'none' }));
+        } else svg.append(S('circle', { cx: x, cy: y, r: nr, fill: '#fff', stroke: on ? '#a0aec0' : '#d5dbe3', 'stroke-width': nr * 0.06 }));
+        // text: white on dark and saturated mid-tone fills (relative luminance < 0.3), else near-black
+        const relL = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+          .map(u => u <= 0.03928 ? u / 12.92 : ((u + 0.055) / 1.055) ** 2.4); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+        const darkN = paintNote && relL(fillN) < 0.3;          // saturated mid-tones read better in white
+        const inkN = paintNote ? (darkN ? '#ffffff' : '#111827') : ink, muteN = paintNote ? inkN : mute;
+        if (root) svg.append(S('text', { x, y: y - nr * 1.08, 'font-size': fs * 1.5, 'text-anchor': 'middle', fill: '#d69e2e', stroke: '#fff', 'stroke-width': fs * 0.1, 'paint-order': 'stroke' }, '★'));
+        const lines = nms.map(n => `${n} (${CD.degreeOf(n, fa, r0, k0)})`), y0 = lines.length === 1 ? -0.12 : -0.36;
+        lines.forEach((ln, i) => svg.append(S('text', { x, y: y + nr * (y0 + i * 0.4), 'font-size': fs * 0.58, 'font-weight': 600, fill: inkN, 'text-anchor': 'middle' }, ln)));
+        svg.append(S('text', { x, y: y + nr * (lines.length === 1 ? 0.36 : 0.56), 'font-size': fs * 0.48, fill: muteN, 'text-anchor': 'middle' }, `${v} | ${t.toFixed(1)}`));
+        if (ttEnds.has(id([a, b]))) svg.append(S('circle', { cx: x, cy: y, r: nr * 1.14, fill: 'none', stroke: '#e53e3e', 'stroke-width': nr * 0.16 })); });
+      legendBox.replaceChildren(...colourLegend(`the key (${k0 === 'm' ? 'natural minor' : 'major'})  ·  faded: a repeat (the rest is the whole map, every chord once)  ·  red band and rings: the key's tritone (vii°)  ·  edges: solid = 5th or major 3rd, dotted = minor 3rd  ·  chord: name (numeral), VL | TD  ·  note: name (scale degree), both names if the fret has two, VL | TD from the home root`));
+    }
+    rerenders.push(render);
+    sel.addEventListener('change', () => { path = []; showTrail(); render(); });
+    showTrail(); render();
+  }
+
+  // ---------------------------------------------------------------- display settings
+  // inline where the code is first introduced, and a floating panel reachable from anywhere
+  function settingsWidget(host) {
+    const demo = el('div', { class: 'cd-legend' });
+    host.append(el('div', { class: 'enc-title' }, 'Display settings for every distance chart in this book'), settingsForm(), demo);
+    const render = () => demo.replaceChildren(...colourLegend('in the key'));
+    rerenders.push(render); render();
+  }
+  document.querySelectorAll('[data-widget="display-settings"]').forEach(settingsWidget);
+  if (document.querySelector('[data-widget]')) {
+    const panel = el('div', { id: 'enc-panel' }, el('div', { class: 'enc-title' }, 'Display settings'), settingsForm());
+    const btn = el('button', { id: 'enc-btn', type: 'button', title: 'Colour map and pattern for every distance chart' }, '🎨 Display');
+    btn.addEventListener('click', () => panel.classList.toggle('on'));
+    document.body.append(panel, btn);
+  }
+
+  document.querySelectorAll('[data-widget="chord-distance"]').forEach(calculator);
+  document.querySelectorAll('[data-widget="neighbour-map"]').forEach(neighbourMap);
+  document.querySelectorAll('[data-widget="chord-neighbours"]').forEach(neighboursChart);
+});
+
+if (typeof module !== 'undefined') module.exports = CD;
+</script></body></html>
